@@ -1,6 +1,7 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
 const cors = require('cors');
+const chromium = require('@sparticuz/chromium');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,18 +36,11 @@ app.post('/generate-pdf', async (req, res) => {
 
     console.log('🚀 Launching browser...');
     const browser = await puppeteer.launch({
-    headless: 'new',
-    args: [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',
-    '--disable-gpu',
-    '--no-first-run',
-    '--no-zygote',
-    '--single-process',
-    '--disable-extensions'
-  ],
-  executablePath: puppeteer.executablePath()
+    headless: chromium.headless,
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath(),
+    ignoreHTTPSErrors: true
 });
 
     const page = await browser.newPage();
@@ -690,5 +684,6 @@ function generateHTMLTemplate(data) {
 </html>
   `;
 }
+
 
 
