@@ -26,7 +26,6 @@ app.post('/generate-pdf', async (req, res) => {
   try {
     const billData = req.body;
     
-    // Validate data
     if (!billData || Object.keys(billData).length === 0) {
       return res.status(400).json({ error: 'No bill data provided' });
     }
@@ -36,44 +35,74 @@ app.post('/generate-pdf', async (req, res) => {
 
     console.log('🚀 Launching browser...');
     const browser = await puppeteer.launch({
-    headless: chromium.headless,
-    args: chromium.args,
-    defaultViewport: chromium.defaultViewport,
-    executablePath: await chromium.executablePath(),
-    ignoreHTTPSErrors: true
-});
+      headless: chromium.headless,
+      args: [
+        ...chromium.args,
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-web-security',
+        '--disable-features=IsolateOrigins,site-per-process',
+        '--font-render-hinting=none',
+        '--disable-gpu'
+      ],
+      defaultViewport: null, // Let Puppeteer use natural viewport
+      executablePath: await chromium.executablePath(),
+      ignoreHTTPSErrors: true
+    });
 
     const page = await browser.newPage();
     
+    // CRITICAL: Set viewport to match standard print preview
+    await page.setViewport({
+      width: 1200,
+      height: 1600,
+      deviceScaleFactor: 1
+    });
+
+    // CRITICAL: Emulate print media (this makes it behave like Ctrl+P)
+    await page.emulateMediaType('print');
+    
     console.log('📝 Setting HTML content...');
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+    await page.setContent(htmlContent, { 
+      waitUntil: 'networkidle0',
+      timeout: 30000
+    });
+
+    // Wait for any fonts or rendering to complete
+    await page.waitForTimeout(1000);
 
     console.log('🖨️ Generating PDF...');
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
+      preferCSSPageSize: true, // IMPORTANT: Use CSS @page settings
+      displayHeaderFooter: false,
       margin: {
         top: 0,
         right: 0,
         bottom: 0,
         left: 0
-      }
+      },
+      // Match browser print scale
+      scale: 1.0
     });
 
     await browser.close();
-console.log('✅ PDF generated successfully!');
-console.log('📦 PDF Buffer size:', pdfBuffer.length, 'bytes');
+    console.log('✅ PDF generated successfully!');
+    console.log('📦 PDF Buffer size:', pdfBuffer.length, 'bytes');
 
-// IMPORTANT: Send as Buffer, not JSON
-res.setHeader('Content-Type', 'application/pdf');
-res.setHeader('Content-Length', pdfBuffer.length);
-res.end(pdfBuffer, 'binary');
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Length', pdfBuffer.length);
+    res.setHeader('Content-Disposition', 'attachment; filename=invoice.pdf');
+    res.end(pdfBuffer, 'binary');
 
   } catch (error) {
     console.error('❌ Error generating PDF:', error);
     res.status(500).json({ 
       error: 'Failed to generate PDF',
-      message: error.message 
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
@@ -94,131 +123,168 @@ function generateHTMLTemplate(data) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tax Invoice</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    /* Replace the <style> section in your generateHTMLTemplate function with this: */
 
-        body {
-            font-family: Calibri, sans-serif;
-            font-size: 11pt;
-            background: #f5f5f5;
-            padding: 20px;
-        }
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
 
-        .page-container {
-            width: 210mm;
-            min-height: 297mm;
-            background: white;
-            margin: 0 auto;
-            padding: 8mm;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        table {
-            border-collapse: collapse;
-            table-layout: fixed;
-            width: 100%;
-        }
-
-        td {
-            padding: 2px 4px;
-            color: black;
-            font-size: 11pt;
-            vertical-align: bottom;
-            white-space: nowrap;
-            line-height: 1.2;
-        }
-
-        /* Column widths */
-        .col1 { width: 5%; }
-        .col2 { width: 34%; }
-        .col3 { width: 10%; }
-        .col4 { width: 10%; }
-        .col5 { width: 9%; }
-        .col6 { width: 5%; }
-        .col7 { width: 11%; }
-
-        /* Border styles */
-        .border-all { border: 0.5pt solid black; }
-        .border-top { border-top: 0.5pt solid black; }
-        .border-right { border-right: 0.5pt solid black; }
-        .border-bottom { border-bottom: 0.5pt solid black; }
-        .border-left { border-left: 0.5pt solid black; }
-        
-        .border-lr { border-left: 0.5pt solid black; border-right: 0.5pt solid black; }
-        .border-tb { border-top: 0.5pt solid black; border-bottom: 0.5pt solid black; }
-        .border-tlr { border-top: 0.5pt solid black; border-left: 0.5pt solid black; border-right: 0.5pt solid black; }
-        .border-lrb { border-left: 0.5pt solid black; border-right: 0.5pt solid black; border-bottom: 0.5pt solid black; }
-
-        /* Text alignment */
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
-        .text-left { text-align: left; }
-
-        /* Font styles */
-        .bold { font-weight: 700; }
-        .font-12 { font-size: 12pt; }
-        .font-11 { font-size: 11pt; }
-        .font-10 { font-size: 10pt; }
-        .font-9 { font-size: 9pt; }
-        .font-8 { font-size: 8pt; }
-        .font-7 { font-size: 7pt; }
-        .font-6 { font-size: 6pt; }
-        .italic { font-style: italic; }
-        .underline { text-decoration: underline; }
-
-        /* Background */
-        .bg-gray { background: #D9D9D9; }
-
-        /* Specific styles */
-        .company-name {
-            font-weight: 700;
-            border-top: 0.5pt solid black;
-            border-left: 0.5pt solid black;
-        }
-
-        .header-row {
-            height: 16pt;
-        }
-        .compact-row {
-    height: 12pt;  /* Smaller height for GST table */
-}
-
-        @media print {
     body {
+        font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+        font-size: 11pt;
         background: white;
         padding: 0;
+        margin: 0;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
 
     .page-container {
         width: 210mm;
-        height: 297mm;
-        margin: 0;
+        min-height: 297mm;
+        background: white;
+        margin: 0 auto;
         padding: 8mm;
-        box-shadow: none;
+        box-sizing: border-box;
+        position: relative;
     }
-
-    
 
     table {
-        page-break-inside: avoid;
+        border-collapse: collapse;
+        table-layout: fixed;
+        width: 100%;
+        border-spacing: 0;
     }
 
-    /* ADD THIS TO PRINT BACKGROUND COLORS */
-* {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-}
-
-    @page {
-        size: A4;
-        margin: 0;
+    td {
+        padding: 2px 4px;
+        color: black;
+        font-size: 11pt;
+        vertical-align: bottom;
+        white-space: nowrap;
+        line-height: 1.2;
+        overflow: visible; /* Changed from hidden */
+        word-wrap: break-word;
     }
-}
-    </style>
+
+    /* PRECISE Column widths - matches your layout exactly */
+    .col1 { width: 5%; min-width: 5%; max-width: 5%; }
+    .col2 { width: 34%; min-width: 34%; max-width: 34%; }
+    .col3 { width: 10%; min-width: 10%; max-width: 10%; }
+    .col4 { width: 10%; min-width: 10%; max-width: 10%; }
+    .col5 { width: 9%; min-width: 9%; max-width: 9%; }
+    .col6 { width: 5%; min-width: 5%; max-width: 5%; }
+    .col7 { width: 11%; min-width: 11%; max-width: 11%; }
+
+    /* Border styles */
+    .border-all { border: 0.5pt solid black; }
+    .border-top { border-top: 0.5pt solid black; }
+    .border-right { border-right: 0.5pt solid black; }
+    .border-bottom { border-bottom: 0.5pt solid black; }
+    .border-left { border-left: 0.5pt solid black; }
+    
+    .border-lr { 
+        border-left: 0.5pt solid black; 
+        border-right: 0.5pt solid black; 
+    }
+    .border-tb { 
+        border-top: 0.5pt solid black; 
+        border-bottom: 0.5pt solid black; 
+    }
+    .border-tlr { 
+        border-top: 0.5pt solid black; 
+        border-left: 0.5pt solid black; 
+        border-right: 0.5pt solid black; 
+    }
+    .border-lrb { 
+        border-left: 0.5pt solid black; 
+        border-right: 0.5pt solid black; 
+        border-bottom: 0.5pt solid black; 
+    }
+
+    /* Text alignment */
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .text-left { text-align: left; }
+
+    /* Font styles */
+    .bold { font-weight: 700; }
+    .font-12 { font-size: 12pt; }
+    .font-11 { font-size: 11pt; }
+    .font-10 { font-size: 10pt; }
+    .font-9 { font-size: 9pt; }
+    .font-8 { font-size: 8pt; }
+    .font-7 { font-size: 7pt; }
+    .font-6 { font-size: 6pt; }
+    .italic { font-style: italic; }
+    .underline { text-decoration: underline; }
+
+    /* Background - CRITICAL for Puppeteer */
+    .bg-gray { 
+        background: #D9D9D9 !important; 
+        background-color: #D9D9D9 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Row heights */
+    .header-row {
+        height: 16pt;
+        min-height: 16pt;
+    }
+    
+    .compact-row {
+        height: 12pt;
+        min-height: 12pt;
+    }
+
+    /* Print-specific rules */
+    @media print {
+        body {
+            background: white;
+            padding: 0;
+            margin: 0;
+        }
+
+        .page-container {
+            width: 210mm;
+            height: 297mm;
+            margin: 0;
+            padding: 8mm;
+            box-shadow: none;
+        }
+
+        table {
+            page-break-inside: avoid;
+        }
+
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+    }
+
+    /* Ensure images render properly */
+    img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+</style>
 </head>
 <body>
     <div class="page-container" style="position: relative;">
@@ -686,6 +752,7 @@ function generateHTMLTemplate(data) {
 </html>
   `;
 }
+
 
 
 
