@@ -129,168 +129,131 @@ function generateHTMLTemplate(data) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tax Invoice</title>
-    /* Replace the <style> section in your generateHTMLTemplate function with this: */
-
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
-    }
-
-    body {
-        font-family: Calibri, 'Segoe UI', Arial, sans-serif;
-        font-size: 11pt;
-        background: white;
-        padding: 0;
-        margin: 0;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }
-
-    .page-container {
-        width: 210mm;
-        min-height: 297mm;
-        background: white;
-        margin: 0 auto;
-        padding: 8mm;
-        box-sizing: border-box;
-        position: relative;
-    }
-
-    table {
-        border-collapse: collapse;
-        table-layout: fixed;
-        width: 100%;
-        border-spacing: 0;
-    }
-
-    td {
-        padding: 2px 4px;
-        color: black;
-        font-size: 11pt;
-        vertical-align: bottom;
-        white-space: nowrap;
-        line-height: 1.2;
-        overflow: visible; /* Changed from hidden */
-        word-wrap: break-word;
-    }
-
-    /* PRECISE Column widths - matches your layout exactly */
-    .col1 { width: 5%; min-width: 5%; max-width: 5%; }
-    .col2 { width: 34%; min-width: 34%; max-width: 34%; }
-    .col3 { width: 10%; min-width: 10%; max-width: 10%; }
-    .col4 { width: 10%; min-width: 10%; max-width: 10%; }
-    .col5 { width: 9%; min-width: 9%; max-width: 9%; }
-    .col6 { width: 5%; min-width: 5%; max-width: 5%; }
-    .col7 { width: 11%; min-width: 11%; max-width: 11%; }
-
-    /* Border styles */
-    .border-all { border: 0.5pt solid black; }
-    .border-top { border-top: 0.5pt solid black; }
-    .border-right { border-right: 0.5pt solid black; }
-    .border-bottom { border-bottom: 0.5pt solid black; }
-    .border-left { border-left: 0.5pt solid black; }
-    
-    .border-lr { 
-        border-left: 0.5pt solid black; 
-        border-right: 0.5pt solid black; 
-    }
-    .border-tb { 
-        border-top: 0.5pt solid black; 
-        border-bottom: 0.5pt solid black; 
-    }
-    .border-tlr { 
-        border-top: 0.5pt solid black; 
-        border-left: 0.5pt solid black; 
-        border-right: 0.5pt solid black; 
-    }
-    .border-lrb { 
-        border-left: 0.5pt solid black; 
-        border-right: 0.5pt solid black; 
-        border-bottom: 0.5pt solid black; 
-    }
-
-    /* Text alignment */
-    .text-center { text-align: center; }
-    .text-right { text-align: right; }
-    .text-left { text-align: left; }
-
-    /* Font styles */
-    .bold { font-weight: 700; }
-    .font-12 { font-size: 12pt; }
-    .font-11 { font-size: 11pt; }
-    .font-10 { font-size: 10pt; }
-    .font-9 { font-size: 9pt; }
-    .font-8 { font-size: 8pt; }
-    .font-7 { font-size: 7pt; }
-    .font-6 { font-size: 6pt; }
-    .italic { font-style: italic; }
-    .underline { text-decoration: underline; }
-
-    /* Background - CRITICAL for Puppeteer */
-    .bg-gray { 
-        background: #D9D9D9 !important; 
-        background-color: #D9D9D9 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-
-    /* Row heights */
-    .header-row {
-        height: 16pt;
-        min-height: 16pt;
-    }
-    
-    .compact-row {
-        height: 12pt;
-        min-height: 12pt;
-    }
-
-    /* Print-specific rules */
-    @media print {
-        body {
-            background: white;
-            padding: 0;
+    <style>
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Calibri, sans-serif;
+            font-size: 11pt;
+            background: #f5f5f5;
+            padding: 20px;
         }
 
         .page-container {
             width: 210mm;
-            height: 297mm;
-            margin: 0;
+            min-height: 297mm;
+            background: white;
+            margin: 0 auto;
             padding: 8mm;
-            box-shadow: none;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
         table {
-            page-break-inside: avoid;
+            border-collapse: collapse;
+            table-layout: fixed;
+            width: 100%;
         }
 
-        * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            color-adjust: exact !important;
+        td {
+            padding: 2px 4px;
+            color: black;
+            font-size: 11pt;
+            vertical-align: bottom;
+            white-space: nowrap;
+            line-height: 1.2;
         }
 
-        @page {
-            size: A4;
-            margin: 0;
+        /* Column widths */
+        .col1 { width: 5%; }
+        .col2 { width: 34%; }
+        .col3 { width: 10%; }
+        .col4 { width: 10%; }
+        .col5 { width: 9%; }
+        .col6 { width: 5%; }
+        .col7 { width: 11%; }
+
+        /* Border styles */
+        .border-all { border: 0.5pt solid black; }
+        .border-top { border-top: 0.5pt solid black; }
+        .border-right { border-right: 0.5pt solid black; }
+        .border-bottom { border-bottom: 0.5pt solid black; }
+        .border-left { border-left: 0.5pt solid black; }
+        
+        .border-lr { border-left: 0.5pt solid black; border-right: 0.5pt solid black; }
+        .border-tb { border-top: 0.5pt solid black; border-bottom: 0.5pt solid black; }
+        .border-tlr { border-top: 0.5pt solid black; border-left: 0.5pt solid black; border-right: 0.5pt solid black; }
+        .border-lrb { border-left: 0.5pt solid black; border-right: 0.5pt solid black; border-bottom: 0.5pt solid black; }
+
+        /* Text alignment */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-left { text-align: left; }
+
+        /* Font styles */
+        .bold { font-weight: 700; }
+        .font-12 { font-size: 12pt; }
+        .font-11 { font-size: 11pt; }
+        .font-10 { font-size: 10pt; }
+        .font-9 { font-size: 9pt; }
+        .font-8 { font-size: 8pt; }
+        .font-7 { font-size: 7pt; }
+        .font-6 { font-size: 6pt; }
+        .italic { font-style: italic; }
+        .underline { text-decoration: underline; }
+
+        /* Background */
+        .bg-gray { background: #D9D9D9; }
+
+        /* Specific styles */
+        .company-name {
+            font-weight: 700;
+            border-top: 0.5pt solid black;
+            border-left: 0.5pt solid black;
         }
+
+        .header-row {
+            height: 16pt;
+        }
+        .compact-row {
+    height: 12pt;  /* Smaller height for GST table */
+}
+
+        @media print {
+    body {
+        background: white;
+        padding: 0;
     }
 
-    /* Ensure images render properly */
-    img {
-        max-width: 100%;
-        height: auto;
-        display: block;
-        image-rendering: -webkit-optimize-contrast;
-        image-rendering: crisp-edges;
+    .page-container {
+        width: 210mm;
+        height: 297mm;
+        margin: 0;
+        padding: 8mm;
+        box-shadow: none;
     }
-</style>
+
+    
+
+    table {
+        page-break-inside: avoid;
+    }
+
+    /* ADD THIS TO PRINT BACKGROUND COLORS */
+* {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+    @page {
+        size: A4;
+        margin: 0;
+    }
+}
+    </style>
 </head>
 <body>
     <div class="page-container" style="position: relative;">
@@ -758,6 +721,7 @@ function generateHTMLTemplate(data) {
 </html>
   `;
 }
+
 
 
 
