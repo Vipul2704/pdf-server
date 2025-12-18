@@ -45,7 +45,8 @@ app.post('/generate-pdf', async (req, res) => {
     '--no-zygote',
     '--single-process',
     '--disable-extensions'
-  ]
+  ],
+  executablePath: puppeteer.executablePath()
 });
 
     const page = await browser.newPage();
@@ -689,4 +690,5 @@ function generateHTMLTemplate(data) {
 </html>
   `;
 }
+
 
