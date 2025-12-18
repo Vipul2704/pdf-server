@@ -63,12 +63,11 @@ app.post('/generate-pdf', async (req, res) => {
     await browser.close();
 console.log('✅ PDF generated successfully!');
 console.log('📦 PDF Buffer size:', pdfBuffer.length, 'bytes');
-console.log('📦 PDF Buffer type:', typeof pdfBuffer);
-console.log('📦 First 10 bytes:', pdfBuffer.slice(0, 10));
 
-// Send PDF back to Flutter app
-res.contentType('application/pdf');
-res.send(pdfBuffer);
+// IMPORTANT: Send as Buffer, not JSON
+res.setHeader('Content-Type', 'application/pdf');
+res.setHeader('Content-Length', pdfBuffer.length);
+res.end(pdfBuffer, 'binary');
 
   } catch (error) {
     console.error('❌ Error generating PDF:', error);
@@ -687,6 +686,7 @@ function generateHTMLTemplate(data) {
 </html>
   `;
 }
+
 
 
 
