@@ -20,6 +20,9 @@ app.get('/', (req, res) => {
 });
 
 // PDF Generation endpoint
+// ===== EXACT BROWSER PRINT MATCH CONFIGURATION =====
+// Replace your PDF generation section with this:
+
 app.post('/generate-pdf', async (req, res) => {
   console.log('📄 PDF generation request received');
   
@@ -65,12 +68,15 @@ app.post('/generate-pdf', async (req, res) => {
     
     console.log('📝 Setting HTML content...');
     await page.setContent(htmlContent, { 
-      waitUntil: 'networkidle0',
+      waitUntil: ['load', 'domcontentloaded', 'networkidle0'],
       timeout: 30000
     });
 
-    // Wait for any fonts or rendering to complete
-    await page.waitForTimeout(1000);
+    // Wait for table to be fully rendered
+    await page.waitForSelector('table', { timeout: 5000 });
+    
+    // Additional wait for fonts and images
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     console.log('🖨️ Generating PDF...');
     const pdfBuffer = await page.pdf({
@@ -752,6 +758,7 @@ function generateHTMLTemplate(data) {
 </html>
   `;
 }
+
 
 
 
