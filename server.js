@@ -35,18 +35,17 @@ app.post('/generate-pdf', async (req, res) => {
 
     console.log('🚀 Launching browser...');
     const browser = await puppeteer.launch({
-  headless: 'new',
-  args: [
+    headless: 'new',
+    args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
     '--disable-dev-shm-usage',
     '--disable-gpu',
-    '--disable-software-rasterizer',
-    '--disable-dev-tools',
+    '--no-first-run',
     '--no-zygote',
-    '--single-process'
-  ],
-  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser'
+    '--single-process',
+    '--disable-extensions'
+  ]
 });
 
     const page = await browser.newPage();
@@ -690,5 +689,4 @@ function generateHTMLTemplate(data) {
 </html>
   `;
 }
-
 
