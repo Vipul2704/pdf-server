@@ -129,7 +129,8 @@ function generateHTMLTemplate(data) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tax Invoice</title>
-    <style>
+    <link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
+<style>
         * {
             margin: 0;
             padding: 0;
@@ -137,7 +138,7 @@ function generateHTMLTemplate(data) {
         }
 
         body {
-            font-family: Calibri, sans-serif;
+            font-family: 'Carlito', Calibri, Arial, sans-serif;
             font-size: 11pt;
             background: #f5f5f5;
             padding: 20px;
@@ -721,6 +722,7 @@ function generateHTMLTemplate(data) {
 </html>
   `;
 }
+
 
 
 
