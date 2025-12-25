@@ -683,13 +683,14 @@ function generateHTMLTemplate(data) {
             </tr>
         </table>
         <!-- QR Code of UPI -->
-     <img src="qr code based on grand total so user pay via upi"
+     <img src="${data.qr_code_base64 || ''}"
      style="
          position: absolute;
          left: 395px;     /* adjust for position */
          bottom: 305px;   /* adjust for position */
          width: 120px;   /* size of QR */
          height: auto;
+         ${data.qr_code_base64 ? '' : 'display: none;'}
         ">
         <div style="
         position: absolute;
@@ -697,11 +698,12 @@ function generateHTMLTemplate(data) {
         bottom: 290px;        /* QR bottom - some px */
         font-size: 7pt;
         font-weight: bold;
+        ${data.qr_code_base64 ? '' : 'display: none;'}
         ">
         SCAN & PAY
         </div>
         <!-- Sign With LOGO -->
-        <img src="fetch from the database base64 code"    
+        <img src="${data.signature_base64}"    
         style="
          position: absolute;
          right: 90px;      /* move left-right */
@@ -722,6 +724,7 @@ function generateHTMLTemplate(data) {
 </html>
   `;
 }
+
 
 
 
