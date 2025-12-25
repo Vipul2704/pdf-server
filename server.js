@@ -537,7 +537,7 @@ function generateHTMLTemplate(data) {
 
             <!-- Bank Details & Calculations -->
             <tr class="header-row">
-                <td colspan="2" class="border-top border-left border-right">GSTIN/UIN : <b>${data.m_company_gstin}</b></td>
+                <td colspan="2" class="border-top border-left border-right">GSTIN/UIN : <b>${data.m_company_gstin && data.m_company_gstin.includes(':') ? data.m_company_gstin.split(':').pop().trim() : (data.m_company_gstin || '')}</b></td>
                 <td class="border-top border-left">&nbsp;</td>
                 <td>&nbsp;</td>
                 <td class="border-top border-left">Sub Total</td>
@@ -568,7 +568,7 @@ function generateHTMLTemplate(data) {
                 <td>&nbsp;</td>
                 <td class="border-left">CGST</td>
             <td class="text-right border-right">${data.b_cgst_perce}</td>
-            <td class="text-right border-right">${data.b_cgst_perce}</td>
+            <td class="text-right border-right">${data.b_cgst_rate}</td>
             </tr>
 
             <tr class="header-row">
@@ -724,6 +724,7 @@ function generateHTMLTemplate(data) {
 </html>
   `;
 }
+
 
 
 
