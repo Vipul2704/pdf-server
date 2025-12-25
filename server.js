@@ -376,7 +376,7 @@ function generateHTMLTemplate(data) {
 
             <tr class="header-row">
                 <td colspan="2" class="border-left border-right">${data.b_company_contact}</td>
-                <td class="border-left">&nbsp;${data.b_terms}</td> 
+                <td class="border-left"><b>&nbsp;${data.b_terms_part1}</b></td> 
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
@@ -385,7 +385,7 @@ function generateHTMLTemplate(data) {
 
             <tr class="header-row">
                 <td colspan="2" class="border-left border-right border-bottom">${data.b_company_email}</td>
-                <td class="border-left border-bottom">&nbsp;</td>
+                <td class="border-left border-bottom"><b>&nbsp;${data.b_terms_part2}</b></td>
                 <td class="border-bottom">&nbsp;</td>
                 <td class="border-bottom">&nbsp;</td>
                 <td class="border-bottom">&nbsp;</td>
@@ -724,6 +724,7 @@ function generateHTMLTemplate(data) {
 </html>
   `;
 }
+
 
 
 
